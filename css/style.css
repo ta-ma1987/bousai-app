@@ -592,7 +592,7 @@ select { flex: 1; min-width: 110px; }
 .home-info-grid > div {
   margin-bottom: 0;
   min-width: 0;
-  height: 64px;
+  height: 84px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -631,12 +631,13 @@ select { flex: 1; min-width: 110px; }
 .home-locate-btn:active { background: var(--primary-dark); }
 .home-card-oneline {
   margin: 4px 0 0;
-  font-size: 0.76rem;
+  font-size: 0.78rem;
   font-weight: 600;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.home-card-oneline .home-card-link { font-size: inherit; font-weight: 700; margin-top: 0; }
 .home-detail-link {
   margin-top: 2px;
   align-self: flex-start;
@@ -654,7 +655,7 @@ select { flex: 1; min-width: 110px; }
   border: 1px solid var(--border);
   border-left: 4px solid var(--accent-warning);
   border-radius: 12px;
-  padding: 7px 9px;
+  padding: 8px 10px;
   box-shadow: var(--shadow-sm);
 }
 .home-quake-card .home-card-title { color: var(--accent-warning); }
@@ -673,7 +674,7 @@ select { flex: 1; min-width: 110px; }
   background: var(--warn-bg);
   border: 1px solid #f0d8b0;
   border-radius: 12px;
-  padding: 7px 9px;
+  padding: 8px 10px;
   box-shadow: var(--shadow-sm);
 }
 .home-typhoon-card.none { background: var(--ok-bg); border-color: #bfe3c6; }
@@ -701,7 +702,7 @@ select { flex: 1; min-width: 110px; }
   border: 1px solid var(--border);
   border-left: 4px solid var(--accent-warning);
   border-radius: 12px;
-  padding: 7px 9px;
+  padding: 8px 10px;
   box-shadow: var(--shadow-sm);
 }
 .home-warning-card .home-card-title { color: var(--accent-warning); }
@@ -723,19 +724,26 @@ select { flex: 1; min-width: 110px; }
 }
 .home-warning-list .warn-area { display: block; font-weight: 700; }
 .home-warning-list .warn-names { display: block; color: var(--danger); }
-.home-card-ok { margin: 6px 0 0; font-size: 0.72rem; color: var(--ok); font-weight: 700; }
+.home-card-ok { color: var(--ok); font-weight: 700; }
 
 .home-heat-card {
   background: #fdf0e6;
   border: 1px solid #f0cba9;
   border-radius: 12px;
-  padding: 7px 9px;
+  padding: 8px 10px;
   box-shadow: var(--shadow-sm);
 }
 .home-heat-card .home-card-title { color: #c96a1f; }
 .home-heat-card .home-locate-btn { background: #c96a1f; }
 .home-heat-card .home-locate-btn:active { background: #a3551a; }
-#home-heat-result { font-size: 0.76rem; }
+#home-warning-result,
+#home-heat-result {
+  font-size: 0.78rem;
+  margin-top: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .home-heat-pref { margin: 0; font-weight: 700; }
 
 .home-expiry-card {
@@ -786,40 +794,62 @@ select { flex: 1; min-width: 110px; }
 .quick-nav-card {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 3px;
+  align-items: stretch;
+  gap: 5px;
+  height: 78px;
   background: var(--card-bg);
   border: 1px solid var(--border);
   border-top: 4px solid var(--accent);
   border-radius: 12px;
-  padding: 11px 10px;
+  padding: 9px 10px;
   text-align: left;
   cursor: pointer;
   box-shadow: var(--shadow-sm);
   font-family: inherit;
   color: var(--text);
+  overflow: hidden;
 }
 .quick-nav-card:active { transform: scale(0.98); }
+.qn-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
 .quick-nav-card .qn-icon {
-  font-size: 1.3rem;
-  width: 32px;
-  height: 32px;
+  font-size: 1.1rem;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 9px;
   background: color-mix(in srgb, var(--accent) 16%, white);
-  margin-bottom: 3px;
 }
-.quick-nav-card .qn-label { font-weight: 700; font-size: 0.84rem; }
-.quick-nav-card .qn-desc { font-size: 0.72rem; color: var(--text-muted); line-height: 1.35; }
+.quick-nav-card .qn-label {
+  font-weight: 700;
+  font-size: 0.84rem;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.quick-nav-card .qn-desc {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  line-height: 1.35;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
 
 .quick-nav-links { cursor: default; }
 .quick-nav-links:active { transform: none; }
 .qn-link-row {
   display: flex;
   gap: 6px;
-  margin-top: 4px;
   width: 100%;
 }
 .qn-link-btn {
