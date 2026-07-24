@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>防災アプリ</title>
+<meta name="theme-color" content="#1d4e89">
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="app-header">
+  <button type="button" id="home-back-btn" class="home-back-btn" data-tab="tab-home" hidden>← ホーム</button>
+  <h1>防災アプリ</h1>
+</header>
+
+<main>
+  <!-- ホーム -->
+  <section id="tab-home" class="tab-panel active">
+    <div class="home-hero">
+      <p class="home-date" id="home-date"></p>
+    </div>
+
+    <div class="home-info-grid">
+      <div class="home-quake-card" id="home-quake-card"></div>
+
+      <div class="home-typhoon-card" id="home-typhoon-card"></div>
+
+      <div class="home-warning-card" id="home-warning-card">
+        <p class="home-card-title">⚠️ 防災警報</p>
+        <button type="button" id="home-warning-btn" class="primary-btn">📍 現在地の警報を確認</button>
+        <div id="home-warning-result"></div>
+      </div>
+
+      <div class="home-heat-card" id="home-heat-card">
+        <p class="home-card-title">🥵 熱中症アラート</p>
+        <button type="button" id="home-heat-btn" class="primary-btn">📍 現在地の警戒情報を確認</button>
+        <div id="home-heat-result"></div>
+      </div>
+    </div>
+
+    <div class="home-expiry-card" id="home-expiry-card"></div>
+
+    <div class="quick-nav-grid">
+      <button type="button" class="quick-nav-card" data-tab="tab-map" style="--accent: var(--accent-map)">
+        <span class="qn-icon">🗺️</span>
+        <span class="qn-label">避難所・ハザード</span>
+        <span class="qn-desc">現在地から避難場所とハザード情報を確認</span>
+      </button>
+      <button type="button" class="quick-nav-card" data-tab="tab-warning" style="--accent: var(--accent-warning)">
+        <span class="qn-icon">⚠️</span>
+        <span class="qn-label">防災警報</span>
+        <span class="qn-desc">気象庁の最新警報・注意報</span>
+      </button>
+      <button type="button" class="quick-nav-card" data-tab="tab-checklist" style="--accent: var(--accent-checklist)">
+        <span class="qn-icon">🎒</span>
+        <span class="qn-label">備蓄チェックリスト</span>
+        <span class="qn-desc">持ち出し品と賞味期限を管理</span>
+      </button>
+      <button type="button" class="quick-nav-card" data-tab="tab-info" style="--accent: var(--accent-info)">
+        <span class="qn-icon">🆘</span>
+        <span class="qn-label">お役立ち情報</span>
+        <span class="qn-desc">171・00000JAPANなど</span>
+      </button>
+      <button type="button" class="quick-nav-card" data-tab="tab-tips" style="--accent: var(--accent-tips); grid-column: span 2;">
+        <span class="qn-icon">🏕️</span>
+        <span class="qn-label">サバイバル豆知識</span>
+        <span class="qn-desc">結び方・応急手当・防寒・灯りの知恵</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- 避難所マップ・ハザードマップ -->
+  <section id="tab-map" class="tab-panel">
+    <div class="section-header">
+      <span class="section-icon">🗺️</span>
+      <div>
+        <h2>避難所・ハザードマップ</h2>
+        <p>現在地周辺の避難場所と洪水・津波・土砂災害の危険区域</p>
+      </div>
+    </div>
+    <div class="panel-controls">
+      <button id="locate-btn" class="primary-btn">現在地から避難所を探す</button>
+      <span id="map-status" class="status-text"></span>
+    </div>
+    <div id="map"></div>
+    <p class="status-text">地図右上のアイコンでハザード情報（洪水・津波・土砂災害）を重ねて表示できます。より詳しい情報は<a href="https://disaportal.gsi.go.jp/maps/index.html" target="_blank" rel="noopener">重ねるハザードマップ（国土交通省）</a>をご確認ください。</p>
+    <ul id="shelter-list" class="shelter-list"></ul>
+  </section>
+
+  <!-- 防災警報 -->
+  <section id="tab-warning" class="tab-panel">
+    <div class="section-header">
+      <span class="section-icon">⚠️</span>
+      <div>
+        <h2>防災警報</h2>
+        <p>気象庁が発表する最新の警報・注意報</p>
+      </div>
+    </div>
+    <div class="panel-controls">
+      <button type="button" id="locate-warning-btn" class="primary-btn">📍 現在地から設定</button>
+    </div>
+    <div class="panel-controls">
+      <select id="area-select"><option value="">地域を選択してください</option></select>
+    </div>
+    <div id="warning-status" class="status-text"></div>
+    <div id="warning-result"></div>
+  </section>
+
+  <!-- 備蓄チェックリスト -->
+  <section id="tab-checklist" class="tab-panel">
+    <div class="section-header">
+      <span class="section-icon">🎒</span>
+      <div>
+        <h2>備蓄チェックリスト</h2>
+        <p>持ち出し品をカテゴリー別に管理・期限も一目で確認</p>
+      </div>
+    </div>
+    <form id="checklist-form" class="checklist-form">
+      <input type="text" id="item-input" placeholder="持ち出し品を追加（例：懐中電灯）" required />
+      <div class="form-row">
+        <select id="category-select">
+          <option value="食品・飲料">🍚 食品・飲料</option>
+          <option value="医薬品・救急">🩹 医薬品・救急</option>
+          <option value="衛生・トイレ用品">🧻 衛生・トイレ用品</option>
+          <option value="情報・照明">🔦 情報・照明</option>
+          <option value="貴重品・書類">💴 貴重品・書類</option>
+          <option value="防寒・衣類">🧥 防寒・衣類</option>
+          <option value="その他">📦 その他</option>
+        </select>
+        <input type="date" id="expiry-input" title="賞味期限・使用期限（任意）" />
+      </div>
+      <button type="submit" class="primary-btn">追加</button>
+    </form>
+    <div id="checklist-groups"></div>
+    <p class="checklist-summary" id="checklist-summary"></p>
+  </section>
+
+  <!-- お役立ち情報 -->
+  <section id="tab-info" class="tab-panel">
+    <div class="section-header">
+      <span class="section-icon">🆘</span>
+      <div>
+        <h2>お役立ち情報</h2>
+        <p>通報・安否確認から支援制度まで、知っておきたい情報を網羅</p>
+      </div>
+    </div>
+
+    <div class="info-group" style="--cat-color:#d1435b">
+      <div class="info-group-title"><span class="cat-icon">🚨</span><span>緊急通報・安否確認</span></div>
+      <details class="info-card" open>
+        <summary>☎️ 緊急通報番号（110 / 119 / 118）</summary>
+        <ul>
+          <li><strong>110番</strong> — 警察（事件・事故・不審者など）</li>
+          <li><strong>119番</strong> — 消防・救急（火事・怪我人・急病）</li>
+          <li><strong>118番</strong> — 海上保安庁（海での事故・事件）</li>
+        </ul>
+        <p>スマホでも発信できますが、住所や目印を落ち着いて伝えることが大切です。会話が難しい場合はチャットで通報できる「Net119」「110番アプリ」に対応する地域もあります。</p>
+      </details>
+      <details class="info-card">
+        <summary>📞 災害用伝言ダイヤル（171）</summary>
+        <p>固定電話・携帯電話・公衆電話から「171」にかけると、音声メッセージで安否情報を録音・再生できます。大規模災害時に提供が開始されます。</p>
+        <ul>
+          <li><strong>録音する:</strong> 171 → 1 → 自分の電話番号（市外局番から）→ メッセージを録音</li>
+          <li><strong>再生する:</strong> 171 → 2 → 相手の電話番号 → メッセージを再生</li>
+        </ul>
+      </details>
+      <details class="info-card">
+        <summary>💻 web171（災害用伝言板 Web版）</summary>
+        <p><a href="https://www.web171.jp/" target="_blank" rel="noopener">web171.jp</a> にアクセスすると、電話番号をキーにテキストで安否情報を登録・確認できます。171と同じ情報を共有します。</p>
+      </details>
+      <details class="info-card">
+        <summary>🏥 各キャリアの災害用伝言板</summary>
+        <p>NTTドコモ・au（KDDI）・ソフトバンクなど各携帯キャリアも独自の災害用伝言板を提供しています。契約している回線のキャリアの伝言板サービスも合わせて確認しておくと安心です。</p>
+      </details>
+    </div>
+
+    <div class="info-group" style="--cat-color:#1d6fd6">
+      <div class="info-group-title"><span class="cat-icon">📡</span><span>情報収集の手段</span></div>
+      <details class="info-card">
+        <summary>📶 00000JAPAN（ファイブゼロジャパン）</summary>
+        <p>大規模災害の発生時に、通信キャリア各社が無料で開放する公衆無線LANです。スマホのWi-Fi設定でSSID「<strong>00000JAPAN</strong>」を選ぶだけで、契約回線を問わず誰でもパスワードなしでインターネットに接続できます。</p>
+      </details>
+      <details class="info-card">
+        <summary>📻 携帯ラジオ・ワイドFM</summary>
+        <p>停電・通信混雑時でもバッテリーだけで情報を受け取れるのがラジオの強みです。乾電池式・手回し充電式の携帯ラジオを備蓄しておくと安心です。</p>
+        <ul>
+          <li>NHKラジオ第1はほぼ全国で防災情報・避難情報を放送</li>
+          <li>「ワイドFM（FM補完放送）」対応ラジオならAM局の番組をFMでもクリアに受信可能</li>
+          <li>スマホの「radiko」でも聴けますが、通信回線が混雑・不通だと使えない点に注意</li>
+        </ul>
+      </details>
+      <details class="info-card">
+        <summary>📲 緊急速報メール（エリアメール）</summary>
+        <p>気象庁の緊急地震速報・特別警報や自治体の避難情報が、対象エリアにいるスマホへ自動配信されます。多くの機種で標準オンですが、設定アプリの「緊急速報メール」からオン/オフを一度確認しておきましょう。</p>
+      </details>
+      <details class="info-card">
+        <summary>📱 防災情報アプリまとめ</summary>
+        <ul>
+          <li><strong>Yahoo!防災速報</strong> — 地震・気象警報・避難情報をプッシュ通知</li>
+          <li><strong>NHKニュース・防災</strong> — ニュースと合わせて災害情報を配信</li>
+          <li><strong>特務機関NERV防災</strong> — シンプルな通知と実況情報が特徴</li>
+          <li>お住まいの自治体が独自の防災アプリ・防災メール配信サービスを提供している場合もあるので、市区町村のサイトも確認しておくと安心</li>
+        </ul>
+      </details>
+      <details class="info-card">
+        <summary>🐦 SNSでの情報収集の注意点</summary>
+        <p>X（旧Twitter）などは現地の状況がいち早く流れる一方、古い情報や誤情報（デマ）も混ざります。自治体・気象庁・消防など公式アカウントの情報を優先し、真偽が不明な情報は拡散する前に一呼吸おきましょう。</p>
+      </details>
+    </div>
+
+    <div class="info-group" style="--cat-color:#e0932b">
+      <div class="info-group-title"><span class="cat-icon">🚦</span><span>避難情報の見方（警戒レベル）</span></div>
+      <details class="info-card">
+        <summary>避難情報の5段階「警戒レベル」</summary>
+        <ul>
+          <li><strong>レベル1・2</strong> — 気象庁の注意報・早期注意情報。心構えを高め、避難行動を確認する段階</li>
+          <li><strong>レベル3（高齢者等避難）</strong> — 高齢者や避難に時間がかかる人は避難を開始</li>
+          <li><strong>レベル4（避難指示）</strong> — 対象エリアの全員が安全な場所へ避難</li>
+          <li><strong>レベル5（緊急安全確保）</strong> — すでに災害が発生・切迫。命を守る最善の行動を</li>
+        </ul>
+        <p>レベル5は必ず発表されるとは限らないため、レベル4までに避難を終えるのが基本です。</p>
+      </details>
+    </div>
+
+    <div class="info-group" style="--cat-color:#2a9d9d">
+      <div class="info-group-title"><span class="cat-icon">🩺</span><span>応急手当の基本</span></div>
+      <details class="info-card">
+        <summary>心肺蘇生（胸骨圧迫）とAED</summary>
+        <ol>
+          <li>反応と呼吸を確認し、なければ大声で助けを呼び、119番通報とAEDの手配を依頼する</li>
+          <li>胸の中央を、1分間に100〜120回のテンポで約5cm沈むように圧迫し続ける</li>
+          <li>AEDが届いたら電源を入れ、音声ガイダンスに従ってパッドを貼る</li>
+          <li>救急隊が到着するまで胸骨圧迫を絶え間なく続ける</li>
+        </ol>
+        <p>実際の手順は自治体や消防署の救命講習で体験しておくと、いざという時に体が動きます。</p>
+      </details>
+      <details class="info-card">
+        <summary>出血時の止血の基本</summary>
+        <p>清潔な布やタオルで傷口を直接、強く圧迫し続ける「直接圧迫止血」が基本です。可能であればビニール手袋などで感染を防ぎましょう。出血が多い、止まらない場合はすぐ救急要請を。</p>
+      </details>
+    </div>
+
+    <div class="info-group" style="--cat-color:#6a4fb6">
+      <div class="info-group-title"><span class="cat-icon">🧳</span><span>支援制度・手続き</span></div>
+      <details class="info-card">
+        <summary>罹災証明書（りさいしょうめいしょ）</summary>
+        <p>住宅などの被害程度を市区町村が証明する書類です。支援金や税・保険料の減免、義援金の受け取りなど各種支援制度の申請に必要になることが多いので、被害を受けたら早めに市区町村の窓口へ申請しましょう。被害箇所は可能な範囲で写真を撮っておくとスムーズです。</p>
+      </details>
+      <details class="info-card">
+        <summary>給水・支援物資の確認先</summary>
+        <p>断水時の給水車の巡回情報や、避難所での物資配布状況は市区町村の公式サイト・SNS・広報車で発表されます。お住まいの自治体名＋「給水」「支援物資」で検索し、平時のうちに情報の入手先を確認しておきましょう。</p>
+      </details>
+    </div>
+
+    <div class="info-group" style="--cat-color:#2e8b6f">
+      <div class="info-group-title"><span class="cat-icon">🐾</span><span>配慮が必要な方へ</span></div>
+      <details class="info-card">
+        <summary>ペットとの同行避難</summary>
+        <p>環境省は「同行避難」（ペットと一緒に避難所まで避難すること）を推奨していますが、避難所内でペットと一緒のスペースで過ごせるかは施設によって異なります。キャリーバッグへの慣れ、フード・水・トイレ用品の備蓄、迷子札やマイクロチップの登録を平時から準備しておきましょう。</p>
+      </details>
+      <details class="info-card">
+        <summary>妊婦・乳幼児のいる家庭の備え</summary>
+        <p>母子健康手帳のコピー、おむつ・ミルク・離乳食、抱っこひも、常備薬は多めに備蓄を。妊娠中・産後の方は早めの避難を心がけ、避難先では体調の変化を遠慮なく周囲や医療従事者に伝えましょう。</p>
+      </details>
+      <details class="info-card">
+        <summary>高齢者・障害のある方への配慮</summary>
+        <p>お薬手帳のコピー、常備薬、補助具の予備、簡単な意思疎通カードなどを用意しておくと安心です。自治体の「避難行動要支援者名簿」に事前登録できる場合があるので、地域の制度も確認しておきましょう。</p>
+      </details>
+    </div>
+  </section>
+
+  <!-- サバイバル豆知識 -->
+  <section id="tab-tips" class="tab-panel">
+    <div class="section-header">
+      <span class="section-icon">🏕️</span>
+      <div>
+        <h2>サバイバル豆知識</h2>
+        <p>覚えておくと災害時にもキャンプにも役立つ知恵</p>
+      </div>
+    </div>
+
+    <div class="info-group" style="--cat-color:#8a5a2e">
+      <div class="info-group-title"><span class="cat-icon">🪢</span><span>ロープワーク</span></div>
+      <details class="info-card" open>
+        <summary>基本の結び方3つ</summary>
+        <p><strong>本結び（リーフノット）</strong> — 荷物やロープ同士をまとめる基本の結び方。</p>
+        <ul>
+          <li>左右のロープ端を交差させて1回結ぶ</li>
+          <li>もう一度、今度は逆向きに交差させて結ぶ</li>
+          <li>「輪の中に輪が通っている」形になっていればOK</li>
+        </ul>
+        <p><strong>もやい結び（ボーライン）</strong> — 荷重がかかっても緩まず、あとでほどきやすい万能の結び方。人を支えるロープや物干しにも使える。</p>
+        <ul>
+          <li>ロープの先端で小さな輪（池）を作る</li>
+          <li>輪の下からロープの先端を通す（ウサギが穴から出るイメージ）</li>
+          <li>先端を本体のロープの後ろに回し、また同じ輪に戻す</li>
+          <li>本体側を引いて締める</li>
+        </ul>
+        <p><strong>巻き結び（クローブヒッチ）</strong> — ポールや杭に素早く結べる。テントのロープ張りや物干しに便利。</p>
+        <ul>
+          <li>ロープをポールに1周巻きつける</li>
+          <li>もう1周巻きつけ、2周目でできた輪の下に先端を通す</li>
+          <li>両端を引いて締める</li>
+        </ul>
+      </details>
+    </div>
+
+    <div class="info-group" style="--cat-color:#d1461f">
+      <div class="info-group-title"><span class="cat-icon">🔥</span><span>火・調理の知恵</span></div>
+      <details class="info-card">
+        <summary>火の起こし方</summary>
+        <p><strong>ライター・マッチがある場合</strong></p>
+        <ul>
+          <li>新聞紙や紙くずを軽く丸めて着火材にする</li>
+          <li>細い枝（割り箸くらいの太さ）を井桁（#の字）や三角錐状に組む</li>
+          <li>火が安定したら少しずつ太い薪を足していく</li>
+        </ul>
+        <p><strong>着火具がない場合の代用</strong></p>
+        <ul>
+          <li>虫眼鏡・メガネのレンズ・ペットボトルの水で太陽光を1点に集めて着火材を炙る</li>
+          <li>木の枝を薄く削って毛羽立たせた「フェザースティック」は火が付きやすい</li>
+          <li>乾いた麻紐やコットンをほぐしたものは着火材として優秀</li>
+        </ul>
+        <p><strong>コツ</strong> — 濡れた薪は避け、風上から火をつけ、空気の通り道を作ること。</p>
+      </details>
+      <details class="info-card">
+        <summary>🍚 ポリ袋（アイラップ）でお米を炊く方法</summary>
+        <p>断水時やカセットコンロしかない状況でも、高密度ポリエチレン製の袋（アイラップ等、湯煎・耐熱表示のあるもの）でご飯が炊けます。</p>
+        <ul>
+          <li>米と水を1:1〜1:1.2の割合で耐熱ポリ袋に入れる</li>
+          <li>袋の空気をしっかり抜いて口を固く結ぶ</li>
+          <li>鍋底にお皿や布を敷き（袋が鍋肌に直接触れないように）、袋がかぶるくらいの水を張る</li>
+          <li>沸騰させ、袋を入れて20〜30分ゆでる</li>
+          <li>取り出して10分ほど蒸らせば完成</li>
+        </ul>
+        <p><strong>注意</strong> — 普通の食品用ポリ袋は溶ける危険があるため使用不可。必ず「耐熱・湯煎可」と表示された袋を使うこと。同じ鍋で複数の袋を同時に茹でれば、家族分やおかずも一緒に作れます。</p>
+      </details>
+      <details class="info-card">
+        <summary>🥫 空き缶・アルミホイルの活用</summary>
+        <p>アルミ缶（ジュース缶など）は上部を切り取ると小さな鍋やコップ代わりになります。アルミホイルは風防にして焚き火の火力を安定させたり、食材を包んで焚き火の中で蒸し焼きにする「ホイル焼き」にも使えます。</p>
+      </details>
+    </div>
+
+    <div class="info-group" style="--cat-color:#d1435b">
+      <div class="info-group-title"><span class="cat-icon">🩹</span><span>ケガの応急手当（キャンプにも役立つ）</span></div>
+      <details class="info-card">
+        <summary>骨折・捻挫の応急固定（添え木）</summary>
+        <ul>
+          <li>木の枝、傘、雑誌、丸めた新聞紙などを「添え木」にする</li>
+          <li>ケガをした部分だけでなく、その上下の関節も一緒に固定するのがコツ</li>
+          <li>手ぬぐいやタオル、包帯、ラップなどで添え木ごと巻いて固定する</li>
+          <li>きつく締めすぎない。指先の血色や感覚がおかしくなっていないか時々確認する</li>
+          <li>可能なら患部を心臓より高い位置に上げ、冷やせるものがあれば冷やす（<strong>RICE処置</strong>＝安静Rest・冷却Ice・圧迫Compression・挙上Elevation）</li>
+        </ul>
+      </details>
+      <details class="info-card">
+        <summary>サランラップ（ラップ）を使った傷の保護</summary>
+        <p>絆創膏やガーゼが手元にないときの応急処置です。</p>
+        <ul>
+          <li>まず清潔な水で傷口の汚れを洗い流す</li>
+          <li>出血していれば清潔な布やタオルで傷口を強く圧迫し、しっかり止血する</li>
+          <li>止血できたら、傷の乾燥を防いで保護する目的でラップを軽く覆うように巻く</li>
+        </ul>
+        <p><strong>注意</strong> — ラップは通気性がないため、長時間の使用や汚れた傷・深い傷には向きません。あくまで一時的な代用品と考え、できるだけ早く医療機関を受診してください。</p>
+      </details>
+      <details class="info-card">
+        <summary>三角巾・タオルで腕を固定する（アームスリング）</summary>
+        <p>大きめの布やタオルを三角に折り、ケガをした腕を「つり包帯」のように首の後ろで結んで固定します。三角巾がなくても、着ているシャツの裾をまくり上げてボタンで留めるだけでも簡易的な代用になります。</p>
+      </details>
+      <details class="info-card">
+        <summary>虫刺され・かぶれの応急対応</summary>
+        <p>まず流水で洗い流し、清潔なタオルで冷やすと腫れやかゆみが和らぎます。ハチに刺された場合は針が残っていれば爪などで横から払うように除去し（つまむと毒が押し込まれるので注意）、呼吸苦・じんましんなど全身症状が出たらすぐ救急要請してください。</p>
+      </details>
+    </div>
+
+    <div class="info-group" style="--cat-color:#5b7fc4">
+      <div class="info-group-title"><span class="cat-icon">🧥</span><span>防寒・応急グッズの作り方</span></div>
+      <details class="info-card">
+        <summary>新聞紙で防寒</summary>
+        <p>新聞紙を体に巻いたり服の中に入れると、紙の間の空気の層が断熱材になって保温効果があります。丸めて靴の中に敷けば底冷え対策にもなります。</p>
+      </details>
+      <details class="info-card">
+        <summary>レジ袋・ゴミ袋で簡易ポンチョ</summary>
+        <p>大きめのポリ袋やゴミ袋の底の角と、両脇に頭と腕を通す穴をあけてかぶれば、簡易的なレインコート・防寒着になります。新聞紙を体に巻いた上から着ると保温効果がさらに高まります。</p>
+      </details>
+      <details class="info-card">
+        <summary>段ボールの活用</summary>
+        <p>床に敷けば底冷えを防ぐ簡易マットに、立てて仕切れば簡易的な目隠し・プライバシー空間になります。避難所生活でも定番の活用法です。</p>
+      </details>
+    </div>
+
+    <div class="info-group" style="--cat-color:#e0932b">
+      <div class="info-group-title"><span class="cat-icon">💡</span><span>灯り・道具の工夫</span></div>
+      <details class="info-card">
+        <summary>ペットボトルランタン</summary>
+        <p>水を入れたペットボトルを懐中電灯やスマホのライトの上にかぶせると、光が乱反射して周囲全体がやわらかく明るく照らせます。</p>
+      </details>
+      <details class="info-card">
+        <summary>ツナ缶ランプ</summary>
+        <p>油に浸したツナ缶（オイル漬け）の中央に切り込みを入れ、ティッシュをこより状にしたものや紐を芯として差し込むと、簡易ランプとして数十分〜1時間ほど灯りが持ちます。必ず屋外や換気の良い場所で、燃えやすい物から離して使用してください。</p>
+      </details>
+    </div>
+
+    <div class="info-group" style="--cat-color:#2a9d9d">
+      <div class="info-group-title"><span class="cat-icon">🧭</span><span>方角・水の知恵</span></div>
+      <details class="info-card">
+        <summary>太陽や星で方角を知る</summary>
+        <ul>
+          <li>晴れた日の正午前後、影は北半球ではおおむね北の方向にのびる</li>
+          <li>アナログ腕時計があれば、短針を太陽に向け、短針と12時の中間の方向がおおよそ南の目安</li>
+          <li>夜は北斗七星やカシオペア座から北極星を見つけると、その方向が北</li>
+        </ul>
+      </details>
+      <details class="info-card">
+        <summary>簡易ろ過の方法（応急・要煮沸）</summary>
+        <p>ペットボトルの底を切って逆さにし、口の部分に布やティッシュ、その上に砂、小石の順に重ねると、濁った水の泥や不純物をある程度取り除けます。</p>
+        <p><strong>重要</strong> — この方法では細菌やウイルスは除去できません。飲む前には必ず1分以上煮沸するか、浄水器・浄水剤を使ってください。</p>
+      </details>
+    </div>
+  </section>
+</main>
+
+<dialog id="quake-dialog" class="detail-dialog">
+  <div class="dialog-header">
+    <h3>🌏 最近の地震情報</h3>
+    <button type="button" class="dialog-close" id="quake-dialog-close">✕</button>
+  </div>
+  <div id="quake-dialog-body" class="dialog-body"></div>
+</dialog>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="js/checklist.js"></script>
+<script src="js/app.js"></script>
+<script src="js/map.js"></script>
+<script src="js/warning.js"></script>
+</body>
+</html>
