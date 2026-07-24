@@ -34,7 +34,7 @@ html {
 html, body {
   margin: 0;
   height: 100%;
-  font-family: "Hiragino Sans", "Yu Gothic", system-ui, sans-serif;
+  font-family: "BIZ UDPGothic", "Hiragino Sans", "Yu Gothic", system-ui, sans-serif;
   background: var(--bg);
   color: var(--text);
 }

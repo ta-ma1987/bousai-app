@@ -1,6 +1,6 @@
 {
-  "name": "防災アプリ",
-  "short_name": "防災アプリ",
+  "name": "そなえナビ",
+  "short_name": "そなえナビ",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f4f6f8",
