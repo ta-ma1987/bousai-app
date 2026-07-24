@@ -1,6 +1,6 @@
 {
-  "name": "そなえナビ",
-  "short_name": "そなえナビ",
+  "name": "備える.com",
+  "short_name": "備える.com",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f4f6f8",
