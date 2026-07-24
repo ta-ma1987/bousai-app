@@ -25,7 +25,7 @@
     <div class="home-hero">
       <div class="home-hero-row">
         <p class="home-date" id="home-date"></p>
-        <div class="home-weather" id="home-weather"></div>
+        <button type="button" class="home-weather" id="home-weather"></button>
       </div>
     </div>
 
@@ -471,6 +471,14 @@
     <button type="button" class="dialog-close" id="quake-dialog-close">✕</button>
   </div>
   <div id="quake-dialog-body" class="dialog-body"></div>
+</dialog>
+
+<dialog id="weather-dialog" class="detail-dialog">
+  <div class="dialog-header">
+    <h3>🌤️ 天気予報</h3>
+    <button type="button" class="dialog-close" id="weather-dialog-close">✕</button>
+  </div>
+  <div id="weather-dialog-body" class="dialog-body"></div>
 </dialog>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>

@@ -165,6 +165,95 @@ const PREF_NAMES = [
   "佐賀県", "長崎県", "熊本県", "大分県", "宮崎県", "鹿児島県", "沖縄県",
 ];
 
+let lastWeatherData = null;
+let lastWeatherAreaName = "";
+
+function weatherCodeIconLabel(code) {
+  const c = parseInt(code, 10);
+  if (isNaN(c)) return { icon: "❓", label: "" };
+  if (c >= 400) return { icon: "❄️", label: "雪" };
+  if (c >= 300) return { icon: "🌧️", label: "雨" };
+  if (c >= 200) return { icon: "☁️", label: "くもり" };
+  return { icon: "☀️", label: "晴れ" };
+}
+
+function formatPopTime(iso) {
+  const d = new Date(iso);
+  return d.toLocaleString("ja-JP", { month: "numeric", day: "numeric", hour: "numeric" }) + "時";
+}
+
+function formatWeekDate(iso) {
+  const d = new Date(iso);
+  return d.toLocaleDateString("ja-JP", { month: "numeric", day: "numeric", weekday: "short" });
+}
+
+function openWeatherDialog() {
+  const dialog = document.getElementById("weather-dialog");
+  const body = document.getElementById("weather-dialog-body");
+  if (!dialog || !body || !lastWeatherData) return;
+
+  const fData = lastWeatherData;
+  const link = `<a class="home-card-link" href="https://www.jma.go.jp/bosai/forecast/" target="_blank" rel="noopener">気象庁で詳しく見る →</a>`;
+
+  // 6時間ごとの降水確率(直近2日分)
+  const popSeries = fData[0]?.timeSeries?.[1];
+  const popArea = popSeries?.areas?.[0];
+  let popRows = "";
+  if (popArea) {
+    popRows = popSeries.timeDefines
+      .map((t, i) => {
+        const pop = popArea.pops[i];
+        if (pop === "" || pop == null) return "";
+        return `<li><span class="wp-time">${formatPopTime(t)}</span><span class="wp-pop">${pop}%</span></li>`;
+      })
+      .join("");
+  }
+
+  // 週間天気予報(7日分)
+  const weekSeries = fData[1]?.timeSeries?.[0];
+  const weekArea = weekSeries?.areas?.[0];
+  const tempSeries = fData[1]?.timeSeries?.[1];
+  const tempArea = tempSeries?.areas?.[0];
+  let weekRows = "";
+  if (weekArea) {
+    weekRows = weekSeries.timeDefines
+      .map((t, i) => {
+        const code = weekArea.weatherCodes[i];
+        const pop = weekArea.pops[i];
+        const { icon } = weatherCodeIconLabel(code);
+        const min = tempArea?.tempsMin?.[i];
+        const max = tempArea?.tempsMax?.[i];
+        const tempText = min || max ? `${min || "-"}° / ${max || "-"}°` : "";
+        return `<li><span class="ww-date">${formatWeekDate(t)}</span><span class="ww-icon">${icon}</span><span class="ww-pop">${
+          pop ? pop + "%" : ""
+        }</span><span class="ww-temp">${tempText}</span></li>`;
+      })
+      .join("");
+  }
+
+  body.innerHTML = `
+    <p class="status-text">📍 ${lastWeatherAreaName}</p>
+    <p class="weather-section-title">今日・明日の降水確率（6時間ごと）</p>
+    <ul class="weather-pop-list">${popRows || "<li>データがありません</li>"}</ul>
+    <p class="weather-section-title">週間天気予報</p>
+    <ul class="weather-week-list">${weekRows || "<li>データがありません</li>"}</ul>
+    ${link}
+  `;
+
+  dialog.showModal();
+}
+
+const weatherDialogEl = document.getElementById("weather-dialog");
+const weatherDialogCloseBtn = document.getElementById("weather-dialog-close");
+const homeWeatherBtn = document.getElementById("home-weather");
+if (weatherDialogCloseBtn) weatherDialogCloseBtn.addEventListener("click", () => weatherDialogEl.close());
+if (weatherDialogEl) {
+  weatherDialogEl.addEventListener("click", (e) => {
+    if (e.target === weatherDialogEl) weatherDialogEl.close();
+  });
+}
+if (homeWeatherBtn) homeWeatherBtn.addEventListener("click", openWeatherDialog);
+
 function weatherIconAndLabel(text) {
   if (text.includes("雷")) return { icon: "⛈️", label: "雷雨" };
   if (text.includes("雪")) return { icon: "❄️", label: "雪" };
@@ -223,7 +312,9 @@ function renderHomeWeather() {
         el.innerHTML = `<span class="home-weather-icon">${icon}</span><span class="home-weather-text">${label}${
           pop !== null ? ` ${pop}%` : ""
         }</span>`;
-        el.title = `${area.area.name}: ${weatherText}`;
+        el.title = `${area.area.name}: ${weatherText}（タップで詳細）`;
+        lastWeatherData = fData;
+        lastWeatherAreaName = area.area.name;
       } catch (err) {
         el.innerHTML = "";
       }
