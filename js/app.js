@@ -13,6 +13,7 @@ function activateTab(target) {
     renderHomeExpiryAlert();
     renderHomeQuake();
     renderHomeTyphoon();
+    renderHomeWeather();
   }
 }
 
@@ -163,6 +164,76 @@ const PREF_NAMES = [
   "鳥取県", "島根県", "岡山県", "広島県", "山口県", "徳島県", "香川県", "愛媛県", "高知県", "福岡県",
   "佐賀県", "長崎県", "熊本県", "大分県", "宮崎県", "鹿児島県", "沖縄県",
 ];
+
+function weatherIconAndLabel(text) {
+  if (text.includes("雷")) return { icon: "⛈️", label: "雷雨" };
+  if (text.includes("雪")) return { icon: "❄️", label: "雪" };
+  if (text.includes("雨") && text.includes("晴")) return { icon: "🌦️", label: "晴れ時々雨" };
+  if (text.includes("雨")) return { icon: "🌧️", label: "雨" };
+  if (text.includes("曇") && text.includes("晴")) return { icon: "⛅", label: "晴れ時々曇り" };
+  if (text.includes("曇")) return { icon: "☁️", label: "くもり" };
+  if (text.includes("晴")) return { icon: "☀️", label: "晴れ" };
+  return { icon: "🌤️", label: "" };
+}
+
+function renderHomeWeather() {
+  const el = document.getElementById("home-weather");
+  if (!el) return;
+  if (!("geolocation" in navigator)) {
+    el.innerHTML = "";
+    return;
+  }
+
+  el.innerHTML = `<span class="home-weather-loading">天気を取得中…</span>`;
+
+  navigator.geolocation.getCurrentPosition(
+    async (pos) => {
+      try {
+        const { latitude: lat, longitude: lon } = pos.coords;
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&accept-language=ja&zoom=10`
+        );
+        if (!res.ok) throw new Error("reverse geocode failed");
+        const geo = await res.json();
+        const isoPref = geo.address?.["ISO3166-2-lvl4"];
+        const prefNumber = isoPref ? isoPref.split("-")[1] : null;
+        if (!prefNumber) throw new Error("prefecture not found");
+
+        const officeCode = window.prefNumberToOfficeCode(prefNumber);
+        const fRes = await fetch(`https://www.jma.go.jp/bosai/forecast/data/forecast/${officeCode}.json`);
+        if (!fRes.ok) throw new Error("forecast fetch failed");
+        const fData = await fRes.json();
+
+        const series = fData[0]?.timeSeries?.[0];
+        const area = series?.areas?.[0];
+        if (!area) throw new Error("no forecast area");
+
+        const weatherText = area.weathers?.[0] || "";
+        const { icon, label } = weatherIconAndLabel(weatherText);
+
+        const popSeries = fData[0]?.timeSeries?.[1];
+        const popArea =
+          popSeries?.areas?.find((a) => a.area.code === area.area.code) || popSeries?.areas?.[0];
+        let pop = null;
+        if (popArea) {
+          const todayPops = popArea.pops.slice(0, 2).map(Number).filter((n) => !isNaN(n));
+          if (todayPops.length) pop = Math.max(...todayPops);
+        }
+
+        el.innerHTML = `<span class="home-weather-icon">${icon}</span><span class="home-weather-text">${label}${
+          pop !== null ? ` ${pop}%` : ""
+        }</span>`;
+        el.title = `${area.area.name}: ${weatherText}`;
+      } catch (err) {
+        el.innerHTML = "";
+      }
+    },
+    () => {
+      el.innerHTML = "";
+    },
+    { enableHighAccuracy: false, timeout: 8000 }
+  );
+}
 
 const homeHeatBtn = document.getElementById("home-heat-btn");
 if (homeHeatBtn) homeHeatBtn.addEventListener("click", locateForHeatAlert);
@@ -317,6 +388,7 @@ renderHomeDate();
 renderHomeExpiryAlert();
 renderHomeQuake();
 renderHomeTyphoon();
+renderHomeWeather();
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {

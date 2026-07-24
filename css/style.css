@@ -583,6 +583,23 @@ select { flex: 1; min-width: 110px; }
   box-shadow: var(--shadow-md);
 }
 .home-hero .home-date { margin: 0; font-size: 0.88rem; font-weight: 600; }
+.home-hero-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.home-weather {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.home-weather-icon { font-size: 1.25rem; line-height: 1; }
+.home-weather-loading { font-size: 0.74rem; font-weight: 500; opacity: 0.85; }
 
 .home-card-title {
   margin: 0;
