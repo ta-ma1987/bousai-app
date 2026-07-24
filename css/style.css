@@ -754,17 +754,12 @@ select { flex: 1; min-width: 110px; }
   margin-bottom: 13px;
   box-shadow: var(--shadow-sm);
 }
-.home-expiry-card.none {
-  background: var(--ok-bg);
-  border-color: #bfe3c6;
-}
 .home-expiry-title {
   margin: 0;
   font-weight: 700;
   font-size: 0.86rem;
   color: var(--danger);
 }
-.home-expiry-card.none .home-expiry-title { color: var(--ok); }
 .expiry-alert-list {
   list-style: none;
   margin: 8px 0 0;

@@ -285,12 +285,12 @@ function renderHomeExpiryAlert() {
     .sort((a, b) => a.diffDays - b.diffDays);
 
   if (nearExpiry.length === 0) {
-    cardEl.className = "home-expiry-card none";
-    cardEl.innerHTML = `<p class="home-expiry-title">✅ 期限が近い備蓄品はありません</p>`;
+    cardEl.hidden = true;
+    cardEl.innerHTML = "";
     return;
   }
 
-  cardEl.className = "home-expiry-card";
+  cardEl.hidden = false;
   const meta = window.CATEGORY_META || {};
   const rows = nearExpiry
     .slice(0, 6)
