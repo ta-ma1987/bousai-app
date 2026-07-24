@@ -28,7 +28,7 @@
 * { box-sizing: border-box; }
 
 html {
-  font-size: 14px;
+  font-size: 16px;
 }
 
 html, body {
@@ -572,7 +572,15 @@ select { flex: 1; min-width: 110px; }
 }
 .home-hero .home-date { margin: 0; font-size: 0.88rem; font-weight: 600; }
 
-.home-card-title { margin: 0; font-weight: 700; font-size: 0.8rem; }
+.home-card-title {
+  margin: 0;
+  font-weight: 700;
+  font-size: 0.8rem;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
 .home-info-grid {
   display: grid;
@@ -584,7 +592,7 @@ select { flex: 1; min-width: 110px; }
 .home-info-grid > div {
   margin-bottom: 0;
   min-width: 0;
-  height: 128px;
+  height: 64px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -601,13 +609,41 @@ select { flex: 1; min-width: 110px; }
   flex-direction: column;
   min-height: 0;
 }
+.home-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+.home-card-header .home-card-title { flex: 1; }
+.home-locate-btn {
+  flex-shrink: 0;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: 3px 9px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.home-locate-btn:active { background: var(--primary-dark); }
+.home-card-oneline {
+  margin: 4px 0 0;
+  font-size: 0.76rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .home-detail-link {
-  margin-top: auto;
+  margin-top: 2px;
   align-self: flex-start;
   background: none;
   border: none;
   padding: 0;
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 700;
   color: var(--primary);
   cursor: pointer;
@@ -618,7 +654,7 @@ select { flex: 1; min-width: 110px; }
   border: 1px solid var(--border);
   border-left: 4px solid var(--accent-warning);
   border-radius: 12px;
-  padding: 10px 11px;
+  padding: 7px 9px;
   box-shadow: var(--shadow-sm);
 }
 .home-quake-card .home-card-title { color: var(--accent-warning); }
@@ -637,7 +673,7 @@ select { flex: 1; min-width: 110px; }
   background: var(--warn-bg);
   border: 1px solid #f0d8b0;
   border-radius: 12px;
-  padding: 10px 11px;
+  padding: 7px 9px;
   box-shadow: var(--shadow-sm);
 }
 .home-typhoon-card.none { background: var(--ok-bg); border-color: #bfe3c6; }
@@ -654,8 +690,8 @@ select { flex: 1; min-width: 110px; }
 }
 .home-card-link {
   display: inline-block;
-  margin-top: 6px;
-  font-size: 0.72rem;
+  margin-top: 2px;
+  font-size: 0.7rem;
   font-weight: 700;
   color: var(--primary);
 }
@@ -665,10 +701,12 @@ select { flex: 1; min-width: 110px; }
   border: 1px solid var(--border);
   border-left: 4px solid var(--accent-warning);
   border-radius: 12px;
-  padding: 10px 11px;
+  padding: 7px 9px;
   box-shadow: var(--shadow-sm);
 }
 .home-warning-card .home-card-title { color: var(--accent-warning); }
+.home-warning-card .home-locate-btn { background: var(--accent-warning); }
+.home-warning-card .home-locate-btn:active { background: color-mix(in srgb, var(--accent-warning) 80%, black); }
 .home-warning-list {
   list-style: none;
   margin: 6px 0 0;
@@ -691,13 +729,13 @@ select { flex: 1; min-width: 110px; }
   background: #fdf0e6;
   border: 1px solid #f0cba9;
   border-radius: 12px;
-  padding: 10px 11px;
+  padding: 7px 9px;
   box-shadow: var(--shadow-sm);
 }
 .home-heat-card .home-card-title { color: #c96a1f; }
-.home-heat-card .primary-btn { background: #c96a1f; width: 100%; }
-.home-heat-card .primary-btn:active { background: #a3551a; }
-#home-heat-result { margin-top: 6px; font-size: 0.74rem; }
+.home-heat-card .home-locate-btn { background: #c96a1f; }
+.home-heat-card .home-locate-btn:active { background: #a3551a; }
+#home-heat-result { font-size: 0.76rem; }
 .home-heat-pref { margin: 0; font-weight: 700; }
 
 .home-expiry-card {

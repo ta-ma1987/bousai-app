@@ -63,19 +63,15 @@ async function renderHomeQuake() {
     const withIntensity = data.filter((q) => q.maxi && parseInt(q.maxi, 10) >= 3);
 
     if (withIntensity.length === 0) {
-      cardEl.innerHTML = `<p class="home-card-title">🌏 地震情報</p><p class="home-card-body"><span class="home-card-ok">✅ 震度3以上の地震はありません</span></p>`;
+      cardEl.innerHTML = `<p class="home-card-title">🌏 地震情報</p><p class="home-card-oneline home-card-ok">✅ 震度3以上の地震はありません</p>`;
       return;
     }
 
     const latest = withIntensity[0];
     cardEl.innerHTML = `
       <p class="home-card-title">🌏 最新の地震情報</p>
-      <div class="home-card-body">
-        <p class="quake-summary-time">${formatQuakeTime(latest.at)}</p>
-        <p class="quake-summary-place">${latest.anm || "震源不明"}</p>
-        <p class="quake-summary-maxi">最大${intensityLabel(latest.maxi)}</p>
-      </div>
-      <button type="button" class="home-detail-link" id="quake-detail-btn">🔍 直近20件を見る</button>
+      <p class="home-card-oneline">${latest.anm || "震源不明"} 最大${intensityLabel(latest.maxi)}（${formatQuakeTime(latest.at)}）</p>
+      <button type="button" class="home-detail-link" id="quake-detail-btn">🔍 詳細</button>
     `;
     document.getElementById("quake-detail-btn").addEventListener("click", openQuakeDialog);
   } catch (err) {
@@ -130,7 +126,7 @@ async function renderHomeTyphoon() {
 
     if (!list.length) {
       cardEl.className = "home-typhoon-card none";
-      cardEl.innerHTML = `<p class="home-card-title">🌀 現在発生中の台風はありません</p>`;
+      cardEl.innerHTML = `<p class="home-card-title">🌀 台風情報</p><p class="home-card-oneline home-card-ok">✅ 発生中の台風はありません</p>`;
       return;
     }
 
@@ -151,11 +147,8 @@ async function renderHomeTyphoon() {
 
     cardEl.innerHTML = `
       <p class="home-card-title">🌀 台風情報</p>
-      <div class="home-card-body">
-        <p class="quake-summary-place">台風第${num}号${name ? `「${name}」` : ""}</p>
-        <p class="quake-summary-time">発生中 ${extra}</p>
-      </div>
-      <a class="home-card-link" href="https://www.jma.go.jp/bosai/typhoon/" target="_blank" rel="noopener">気象庁で詳しく見る →</a>
+      <p class="home-card-oneline">台風第${num}号${name ? `「${name}」` : ""} ${extra}</p>
+      <a class="home-card-link" href="https://www.jma.go.jp/bosai/typhoon/" target="_blank" rel="noopener">詳しく見る →</a>
     `;
   } catch (err) {
     cardEl.innerHTML = `<p class="home-card-title">🌀 台風情報を取得できませんでした</p>`;
@@ -199,8 +192,7 @@ function locateForHeatAlert() {
         if (!prefName) throw new Error("prefecture not found");
 
         resultEl.innerHTML = `
-          <p class="home-heat-pref">📍 ${prefName}</p>
-          <a class="home-card-link" href="https://www.wbgt.env.go.jp/alert.php" target="_blank" rel="noopener">環境省サイトで警戒アラートを見る →</a>
+          <p class="home-card-oneline">📍 ${prefName} <a class="home-card-link" href="https://www.wbgt.env.go.jp/alert.php" target="_blank" rel="noopener">確認 →</a></p>
         `;
       } catch (err) {
         resultEl.textContent = "現在地から地域を特定できませんでした。";
@@ -245,16 +237,11 @@ function locateForHomeWarning() {
         const items = await window.fetchActiveWarnings(officeCode);
 
         if (items.length === 0) {
-          resultEl.innerHTML = `<p class="home-card-ok">✅ 現在発表中の警報はありません</p>`;
+          resultEl.innerHTML = `<p class="home-card-oneline home-card-ok">✅ 警報なし</p>`;
         } else {
           const first = items[0];
           const extra = items.length > 1 ? `ほか${items.length - 1}地域` : "";
-          resultEl.innerHTML = `
-            <ul class="home-warning-list">
-              <li><span class="warn-area">${first.areaName}</span><span class="warn-names">${first.names.join("・")}</span></li>
-            </ul>
-            ${extra ? `<p class="quake-summary-time">${extra}</p>` : ""}
-          `;
+          resultEl.innerHTML = `<p class="home-card-oneline">${first.areaName} ${first.names.join("・")} ${extra}</p>`;
         }
       } catch (err) {
         resultEl.textContent = "現在地から地域を特定できませんでした。";
