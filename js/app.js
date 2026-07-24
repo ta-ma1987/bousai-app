@@ -2,6 +2,17 @@ const navTargets = document.querySelectorAll("[data-tab]");
 const tabPanels = document.querySelectorAll(".tab-panel");
 const homeBackBtn = document.getElementById("home-back-btn");
 
+// 一部のブラウザ(古いiOS Safari等)は <dialog> の showModal 未対応のため、
+// 失敗時は open 属性を直接付けて非モーダル表示にフォールバックする。
+function openDialogSafely(dialogEl) {
+  if (!dialogEl) return;
+  try {
+    dialogEl.showModal();
+  } catch (err) {
+    dialogEl.setAttribute("open", "");
+  }
+}
+
 function activateTab(target) {
   tabPanels.forEach((p) => p.classList.toggle("active", p.id === target));
   homeBackBtn.hidden = target === "tab-home";
@@ -103,7 +114,7 @@ function openQuakeDialog() {
     body.innerHTML = `<ul class="dialog-quake-list">${rows}</ul>${link}`;
   }
 
-  dialog.showModal();
+  openDialogSafely(dialog);
 }
 
 const quakeDialogEl = document.getElementById("quake-dialog");
@@ -190,7 +201,23 @@ function formatWeekDate(iso) {
 function openWeatherDialog() {
   const dialog = document.getElementById("weather-dialog");
   const body = document.getElementById("weather-dialog-body");
-  if (!dialog || !body || !lastWeatherData) return;
+  if (!dialog || !body) return;
+
+  if (!lastWeatherData) {
+    body.innerHTML = `
+      <p class="status-text">天気情報がまだ取得できていません。位置情報の利用を許可しているか確認するか、少し時間をおいて再度お試しください。</p>
+      <button type="button" class="primary-btn" id="weather-retry-btn">🔄 再取得する</button>
+    `;
+    openDialogSafely(dialog);
+    const retryBtn = document.getElementById("weather-retry-btn");
+    if (retryBtn) {
+      retryBtn.addEventListener("click", () => {
+        dialog.close();
+        renderHomeWeather();
+      });
+    }
+    return;
+  }
 
   const fData = lastWeatherData;
   const link = `<a class="home-card-link" href="https://www.jma.go.jp/bosai/forecast/" target="_blank" rel="noopener">気象庁で詳しく見る →</a>`;
@@ -240,7 +267,7 @@ function openWeatherDialog() {
     ${link}
   `;
 
-  dialog.showModal();
+  openDialogSafely(dialog);
 }
 
 const weatherDialogEl = document.getElementById("weather-dialog");

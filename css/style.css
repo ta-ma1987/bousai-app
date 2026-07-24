@@ -647,10 +647,8 @@ select { flex: 1; min-width: 110px; }
   margin: 0;
   font-weight: 700;
   font-size: 0.8rem;
+  line-height: 1.25;
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .home-info-grid {
@@ -663,7 +661,7 @@ select { flex: 1; min-width: 110px; }
 .home-info-grid > div {
   margin-bottom: 0;
   min-width: 0;
-  height: 84px;
+  height: 92px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -682,13 +680,14 @@ select { flex: 1; min-width: 110px; }
 }
 .home-card-header {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 6px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
 }
-.home-card-header .home-card-title { flex: 1; }
+.home-card-header .home-card-title { width: 100%; }
 .home-locate-btn {
   flex-shrink: 0;
+  align-self: flex-start;
   background: var(--primary);
   color: #fff;
   border: none;
@@ -862,7 +861,7 @@ select { flex: 1; min-width: 110px; }
   flex-direction: column;
   align-items: stretch;
   gap: 5px;
-  height: 78px;
+  height: 98px;
   background: var(--card-bg);
   border: 1px solid var(--border);
   border-top: 4px solid var(--accent);
@@ -878,7 +877,7 @@ select { flex: 1; min-width: 110px; }
 .quick-nav-card:active { transform: scale(0.98); }
 .qn-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
   min-width: 0;
 }
@@ -896,19 +895,16 @@ select { flex: 1; min-width: 110px; }
 .quick-nav-card .qn-label {
   font-weight: 700;
   font-size: 0.84rem;
+  line-height: 1.25;
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  padding-top: 3px;
 }
 .quick-nav-card .qn-desc {
   font-size: 0.72rem;
   color: var(--text-muted);
   line-height: 1.35;
+  max-height: 32px;
   overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
 }
 
 .quick-nav-links { cursor: default; }
@@ -940,6 +936,15 @@ select { flex: 1; min-width: 110px; }
   box-shadow: var(--shadow-md);
 }
 .detail-dialog::backdrop { background: rgba(16, 34, 51, 0.5); }
+/* showModal未対応ブラウザ向けフォールバック(open属性のみで表示された場合) */
+.detail-dialog[open]:not(:modal) {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  margin: 0;
+  z-index: 100;
+}
 .dialog-header {
   display: flex;
   align-items: center;
