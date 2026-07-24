@@ -946,6 +946,21 @@ select { flex: 1; min-width: 110px; }
 }
 .qn-link-btn:active { background: color-mix(in srgb, var(--accent) 28%, white); }
 
+.home-tips-link {
+  display: block;
+  width: 100%;
+  text-align: center;
+  margin: 2px 0 4px;
+  padding: 6px;
+  font-size: 0.76rem;
+  font-family: inherit;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.home-tips-link:active { color: var(--primary); }
+
 .detail-dialog {
   width: min(480px, 90vw);
   max-height: 92vh;
