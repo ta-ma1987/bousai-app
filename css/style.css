@@ -559,6 +559,26 @@ select { flex: 1; min-width: 110px; }
 .info-card ul, .info-card ol { margin: 5px 0; padding-left: 18px; line-height: 1.6; font-size: 0.88rem; }
 .info-card a { color: var(--primary); font-weight: 600; }
 
+.knot-diagram {
+  margin: 8px 0;
+  padding: 10px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  text-align: center;
+}
+.knot-diagram img {
+  max-width: 100%;
+  height: auto;
+  max-height: 220px;
+}
+.knot-diagram figcaption {
+  margin-top: 6px;
+  font-size: 0.68rem;
+  color: var(--text-muted);
+}
+.knot-diagram figcaption a { color: var(--text-muted); text-decoration: underline; }
+
 .warning-card {
   background: var(--card-bg);
   border: 1px solid var(--border);
