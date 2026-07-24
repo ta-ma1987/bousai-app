@@ -123,6 +123,11 @@
         <p>持ち出し品をカテゴリー別に管理・期限も一目で確認</p>
       </div>
     </div>
+    <div class="panel-controls">
+      <button type="button" id="checklist-export-btn" class="backup-btn">📤 バックアップを保存</button>
+      <button type="button" id="checklist-import-btn" class="backup-btn">📥 バックアップを読み込む</button>
+      <input type="file" id="checklist-import-input" accept="application/json" hidden />
+    </div>
     <form id="checklist-form" class="checklist-form">
       <input type="text" id="item-input" placeholder="持ち出し品を追加（例：懐中電灯）" required />
       <div class="form-row">
@@ -273,6 +278,35 @@
       <details class="info-card">
         <summary>高齢者・障害のある方への配慮</summary>
         <p>お薬手帳のコピー、常備薬、補助具の予備、簡単な意思疎通カードなどを用意しておくと安心です。自治体の「避難行動要支援者名簿」に事前登録できる場合があるので、地域の制度も確認しておきましょう。</p>
+      </details>
+    </div>
+
+    <div class="info-group" style="--cat-color:#164a86">
+      <div class="info-group-title"><span class="cat-icon">📱</span><span>このアプリの使い方Tips</span></div>
+      <details class="info-card">
+        <summary>📤 データのバックアップ・引き継ぎ</summary>
+        <p>備蓄チェックリストタブの上部にある「📤 バックアップを保存」から、今の持ち出し品リストをファイルとして端末に保存できます。機種変更やブラウザのデータ消去に備えて、時々バックアップを取っておくと安心です。</p>
+        <p>保存したファイルは「📥 バックアップを読み込む」から選択すると復元できます（読み込むと今のリストは上書きされるので注意してください）。</p>
+      </details>
+      <details class="info-card">
+        <summary>🏠 ホーム画面に追加する</summary>
+        <p>スマホのブラウザでこのアプリを開き、共有メニュー（iPhoneはSafariの共有ボタン）や設定メニュー（Androidはブラウザのメニュー）から「ホーム画面に追加」を選ぶと、アイコンをタップするだけでアプリのように起動できます。</p>
+      </details>
+      <details class="info-card">
+        <summary>📍 「現在地」ボタンについて</summary>
+        <p>ホーム画面の「防災警報」「熱中症警戒アラート」にある📍現在地ボタンは、端末の位置情報からお住まいの都道府県を判定して、その地域の最新情報を表示します。初回はブラウザから位置情報の利用許可を求められるので「許可」を選んでください。</p>
+      </details>
+      <details class="info-card">
+        <summary>🧲 持ち出し品をドラッグしてカテゴリー移動</summary>
+        <p>チェックリストの各アイテム左側にある「⠿」マークを長押ししてドラッグすると、別のカテゴリーへ移動できます。カテゴリーを間違えて登録してしまった時に便利です。</p>
+      </details>
+      <details class="info-card">
+        <summary>🪄 バリエーション（親子アイテム）の登録</summary>
+        <p>「電池」や「モバイルバッテリー」のように、同じ持ち物でもサイズ・容量違いがある場合は、アイテムの「＋」ボタンから種類ごとの子アイテムを追加できます（例：単3電池・単2電池）。それぞれ個別にチェック・期限管理ができます。</p>
+      </details>
+      <details class="info-card">
+        <summary>🔔 期限アラートの表示について</summary>
+        <p>賞味期限・使用期限が近い（14日以内）持ち出し品がある時だけ、ホーム画面の日付の下に自動でアラートが表示されます。該当する品がない時は何も表示されません。</p>
       </details>
     </div>
   </section>

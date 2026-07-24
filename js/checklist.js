@@ -620,4 +620,75 @@ formEl.addEventListener("submit", (e) => {
   renderChecklist();
 });
 
+function normalizeImportedItem(raw) {
+  const category = CATEGORY_ORDER.includes(raw.category) ? raw.category : "その他";
+  const item = {
+    id: raw.id || crypto.randomUUID(),
+    label: raw.label ? String(raw.label) : "無題",
+    category,
+    done: !!raw.done,
+    expiry: raw.expiry || null,
+  };
+  if (Array.isArray(raw.children) && raw.children.length > 0) {
+    item.children = raw.children.map((c) => ({
+      id: c.id || crypto.randomUUID(),
+      label: c.label ? String(c.label) : "無題",
+      done: !!c.done,
+      expiry: c.expiry || null,
+    }));
+  }
+  return item;
+}
+
+const exportBtn = document.getElementById("checklist-export-btn");
+const importBtn = document.getElementById("checklist-import-btn");
+const importInputEl = document.getElementById("checklist-import-input");
+
+if (exportBtn) {
+  exportBtn.addEventListener("click", () => {
+    const dateStr = new Date().toISOString().slice(0, 10);
+    const blob = new Blob([JSON.stringify(items, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `備える-バックアップ_${dateStr}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  });
+}
+
+if (importBtn && importInputEl) {
+  importBtn.addEventListener("click", () => importInputEl.click());
+  importInputEl.addEventListener("change", () => {
+    const file = importInputEl.files[0];
+    importInputEl.value = "";
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const parsed = JSON.parse(reader.result);
+        if (!Array.isArray(parsed)) throw new Error("invalid format");
+
+        const proceed = confirm(
+          `バックアップを読み込むと、現在のチェックリスト（${items.length}件）が置き換わります。よろしいですか？`
+        );
+        if (!proceed) return;
+
+        items = parsed.map(normalizeImportedItem);
+        saveItems(items);
+        editingId = null;
+        addingVariantId = null;
+        renderChecklist();
+        alert("バックアップを読み込みました。");
+      } catch (err) {
+        alert("バックアップファイルを読み込めませんでした。ファイルが壊れているか、形式が正しくない可能性があります。");
+      }
+    };
+    reader.readAsText(file);
+  });
+}
+
 renderChecklist();
