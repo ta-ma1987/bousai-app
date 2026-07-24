@@ -13,7 +13,9 @@ function openDialogSafely(dialogEl) {
   }
 }
 
-function activateTab(target) {
+function activateTab(target, options = {}) {
+  const { pushHistory = true } = options;
+
   tabPanels.forEach((p) => p.classList.toggle("active", p.id === target));
   homeBackBtn.hidden = target === "tab-home";
 
@@ -26,10 +28,29 @@ function activateTab(target) {
     renderHomeTyphoon();
     renderHomeWeather();
   }
+
+  if (pushHistory && history.state?.tab !== target) {
+    history.pushState({ tab: target }, "", "#" + target);
+  }
 }
 
+// タブ内画面(避難所・ハザード等)を開いた状態でスマホの「戻る」操作をしても
+// アプリごと離脱しないよう、タブ遷移をブラウザ履歴に積んでpopstateで戻す。
+history.replaceState({ tab: "tab-home" }, "", "#tab-home");
+
 navTargets.forEach((el) => {
-  el.addEventListener("click", () => activateTab(el.dataset.tab));
+  el.addEventListener("click", () => {
+    if (el.id === "home-back-btn") {
+      history.back();
+    } else {
+      activateTab(el.dataset.tab);
+    }
+  });
+});
+
+window.addEventListener("popstate", (e) => {
+  const tab = e.state?.tab || "tab-home";
+  activateTab(tab, { pushHistory: false });
 });
 
 function renderHomeDate() {
